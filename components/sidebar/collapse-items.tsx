@@ -1,22 +1,60 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronUpIcon } from "../icons/sidebar/chevron-up-icon";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import clsx from "clsx";
+import NextLink from "next/link";
+import { useSidebarContext } from "../layout/layout-context";
+import { NextPage } from "next";
 
-interface Props {
-  icon: React.ReactNode;
+export interface PropsSubItem {
   title: string;
-  items: string[];
+  icon: React.ReactNode;
+  isActive?: boolean;
+  href?: string | any;
 }
 
-export const CollapseItems = ({ icon, items, title }: Props) => {
-  const [open, setOpen] = useState(false);
+interface Props {
+  keys: any;
+  icon: React.ReactNode;
+  title: string;
+  items: PropsSubItem[];
+  isSelected: any;
+  onSelectionChange: (keys: Set<any>) => void;
+}
+
+export const CollapseItems: NextPage<Props> = ({
+  keys,
+  icon,
+  items,
+  title,
+  onSelectionChange,
+  isSelected,
+}) => {
+  const { collapsed, setCollapsed } = useSidebarContext();
+  const handleClick = () => {
+    if (window.innerWidth < 768) {
+      setCollapsed(false);
+    }
+  };
+
+  const onSelectionChangeFunction = (index: any) => {
+    if (index.currentKey === undefined) {
+      onSelectionChange(new Set(["0"]));
+    } else {
+      onSelectionChange(keys);
+    }
+  };
 
   return (
     <div className="flex gap-4 h-full items-center cursor-pointer">
-      <Accordion className="px-0">
+      <Accordion
+        className="px-0"
+        selectedKeys={isSelected}
+        onSelectionChange={onSelectionChangeFunction}
+      >
         <AccordionItem
+          key={keys}
           indicator={<ChevronUpIcon />}
           classNames={{
             indicator: "data-[open=true]:-rotate-180",
@@ -26,7 +64,7 @@ export const CollapseItems = ({ icon, items, title }: Props) => {
             title:
               "px-0 flex text-base gap-2 h-full items-center cursor-pointer",
           }}
-          aria-label="Accordion 1"
+          aria-label={title}
           title={
             <div className="flex flex-row gap-2">
               <span>{icon}</span>
@@ -34,106 +72,34 @@ export const CollapseItems = ({ icon, items, title }: Props) => {
             </div>
           }
         >
-          <div className="pl-12">
+          <div className="pl-6">
             {items.map((item, index) => (
               <span
                 key={index}
                 className="w-full flex  text-default-500 hover:text-default-900 transition-colors"
               >
-                {item}
+                <NextLink
+                  href={item.href}
+                  className="text-default-900 active:bg-none max-w-full"
+                >
+                  <div
+                    className={clsx(
+                      item.isActive
+                        ? "bg-primary-100 [&_svg_path]:fill-primary-500"
+                        : "hover:bg-default-100",
+                      "flex gap-2 w-full min-h-[44px] h-full items-center px-3.5 rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.98]"
+                    )}
+                    onClick={handleClick}
+                  >
+                    {item.icon}
+                    <span className="text-default-900">{item.title}</span>
+                  </div>
+                </NextLink>
               </span>
             ))}
           </div>
         </AccordionItem>
       </Accordion>
-      {/* <Accordion
-        title={
-          <div
-            className="flex items-center justify-between w-full py-5 px-7 rounded-8 transition-all duration-150 ease-in-out cursor-pointer hover:bg-accents2 active:scale-98"
-            // css={{
-            //   gap: "$6",
-            //   width: "100%",
-            //   py: "$5",
-            //   px: "$7",
-            //   borderRadius: "8px",
-            //   transition: "all 0.15s ease",
-            //   "&:active": {
-            //     transform: "scale(0.98)",
-            //   },
-            //   "&:hover": {
-            //     bg: "$accents2",
-            //   },
-            // }}
-            // justify={"between"}
-            onClick={handleToggle}
-          >
-            <div className="flex gap-4">
-              {icon}
-              <span
-                className="text-default-900 font-medium text-base"
-                //  span
-                //  weight={"normal"}
-                //  size={"$base"}
-                //  css={{
-                //    color: "$accents9",
-                //  }}
-              >
-                {title}
-              </span>
-            </div>
-
-            <ChevronUpIcon
-              className={clsx(
-                open ? "rotate-180" : "rotate-0",
-                "transition-all duration-300 ease-in-out transform"
-              )}
-              //   css={{
-              //     transition: "transform 0.3s ease",
-              //     transform: open ? "rotate(-180deg)" : "rotate(0deg)",
-              //   }}
-            />
-          </div>
-        }
-        //   css={{
-        //     width: "100%",
-        //     "& .nextui-collapse-view": {
-        //       p: "0",
-        //     },
-        //     "& .nextui-collapse-content": {
-        //       marginTop: "$1",
-        //       padding: "0px",
-        //     },
-        //   }}
-        divider={false}
-        showArrow={false}
-      >
-        {items.map((item, index) => (
-          <div
-            className="flex flex-col pl-8"
-            key={index}
-            // direction={"column"}
-            // css={{
-            //   paddingLeft: "$16",
-            // }}
-          >
-            <span
-              className="text-default-400 font-normal text-md"
-              //   span
-              //   weight={"normal"}
-              //   size={"$md"}
-              //   css={{
-              //     color: "$accents8",
-              //     cursor: "pointer",
-              //     "&:hover": {
-              //       color: "$accents9",
-              //     },
-              //   }}
-            >
-              {item}
-            </span>
-          </div>
-        ))}
-      </Accordion> */}
     </div>
   );
 };

@@ -2,7 +2,7 @@ import {createContext, useContext} from 'react';
 
 interface SidebarContext {
    collapsed: boolean;
-   setCollapsed: () => void;
+   setCollapsed: (value: boolean) => void;
 }
 
 export const SidebarContext = createContext<SidebarContext>({
